@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventHub - Find & Book Events</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold fs-4" href="index.html">
+                <i class="bi bi-lightning-charge-fill text-warning"></i> EventHub
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center" id="navLinks"></ul>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero-section">
+        <div class="container position-relative" style="z-index: 2;">
+            <h1 class="display-3 fw-bold mb-4">Discover Amazing Events</h1>
+            <p class="lead mb-5" style="max-width: 600px; margin: 0 auto; color: rgba(255,255,255,0.85);">Book your tickets for the best tech, music, and art events occurring around the globe. Elevate your networking game.</p>
+            <a href="events.html" class="btn btn-light btn-lg rounded-pill px-5 fw-bold text-primary shadow">
+                Browse Live Events <i class="bi bi-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </header>
+
+    <section class="py-5" style="margin-top: -60px; position: relative; z-index: 5;">
+        <div class="container">
+            <h2 class="text-center fw-bold mb-5 text-dark">Upcoming Featured Events</h2>
+            <div class="row g-4" id="eventsContainer">
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <h5 class="fw-bold text-white"><i class="bi bi-lightning-charge-fill text-warning"></i> EventHub</h5>
+                    <p class="small">The premium destination for managing and discovering incredible events.</p>
+                </div>
+                <div class="col-md-6 text-md-end align-self-end">
+                    <p class="mb-0 small">&copy; 2026 EventHub Inc. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            const userStr = localStorage.getItem('user');
+            
+            let navHtml = '<li class="nav-item"><a class="nav-link fw-bold px-3" href="events.html">Explore</a></li>';
+            if (token && userStr) {
+                const user = JSON.parse(userStr);
+                navHtml += `
+                    <li class="nav-item"><a class="nav-link fw-bold px-3" href="${user.role === 'admin' ? 'admin.html' : 'dashboard.html'}">Dashboard</a></li>
+                    <li class="nav-item ms-2"><button class="btn btn-outline-light rounded-pill px-4 fw-bold" onclick="logout()">Logout</button></li>
+                `;
+            } else {
+                navHtml += `
+                    <li class="nav-item"><a class="nav-link fw-bold px-3" href="login.html">Log In</a></li>
+                    <li class="nav-item ms-2"><a class="btn btn-primary text-white rounded-pill px-4 fw-bold shadow-sm" href="register.html">Sign Up Free</a></li>
+                `;
+            }
+            document.getElementById('navLinks').innerHTML = navHtml;
+
+            const container = document.getElementById('eventsContainer');
+            try {
+                const events = await fetchAPI('/events');
+                if (events.length === 0) {
+                    container.innerHTML = '<p class="text-center text-muted fw-bold">No upcoming events right now.</p>';
+                    return;
+                }
+                
+                const techImages = [
+                    '1540575467063-178a50c2df87', // conference
+                    '1492684223066-81342ee5ff30', // concert
+                    '1515187029135-18ee286d815b', // meeting
+                    '1505373877841-8d25f7d46678'  // tech
+                ];
+
+                let html = '';
+                events.slice(0, 3).forEach((event, index) => {
+                    const date = new Date(event.event_date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    const imgHash = techImages[index % techImages.length];
+                    const imgSrc = `https://images.unsplash.com/photo-${imgHash}?w=800&q=80`;
+                    
+                    html += `
+                    <div class="col-md-4">
+                        <div class="card h-100 card-event shadow-sm">
+                            <div class="img-wrapper">
+                                <span class="badge-overlay"><i class="bi bi-star-fill text-warning"></i> Featured</span>
+                                <img src="${imgSrc}" class="event-img" alt="${event.title}">
+                            </div>
+                            <div class="card-body p-4 d-flex flex-column">
+                                <h5 class="card-title fw-bold mb-2">${event.title}</h5>
+                                <p class="text-muted small mb-3 fw-bold"><i class="bi bi-calendar text-primary me-1"></i> ${date}</p>
+                                <p class="card-text text-muted mb-4" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${event.description}</p>
+                                <div class="mt-auto">
+                                    <p class="small text-dark fw-bold mb-0"><i class="bi bi-geo-alt text-danger me-1"></i> ${event.location}</p>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white border-0 pb-4 px-4 pt-0">
+                                <a href="event.html?id=${event.id}" class="btn btn-outline-primary w-100 rounded-pill fw-bold">View full details</a>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } catch (err) {
+                container.innerHTML = '<p class="text-center text-danger">Failed to load events.</p>';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Admin",
+      "email": "admin@event.com",
+      "password": "$2b$10$U3JvMCbtbVpXWXiyf/cPLOkYVTXZ4CqON3Wwu/vAfJeB3a0Ikbx1G",
+      "role": "admin"
+    },
+    {
+      "id": 2,
+      "name": "Sangmesh P",
+      "email": "sangmeshp@gmail.com",
+      "password": "$2b$10$QFY4Lrgzir0.huJu.lRVUOJHeOkl65r9Iywxlui305/EmSthveJ7O",
+      "role": "user",
+      "created_at": "2026-03-25T16:54:02.727Z"
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "title": "Global Tech Innovation Summit 2026",
+      "description": "Join leading industry experts, developers, and visionaries for a 3-day immersive experience covering the latest in Artificial Intelligence, Web3 architectures, and scalable cloud deployments. Network with thousands of peers globally.",
+      "event_date": "2026-06-15T09:00:00.000Z",
+      "location": "Moscone Center, San Francisco, CA",
+      "created_by": 1,
+      "created_at": "2026-03-25T17:00:00.000Z",
+      "image": "1"
+    },
+    {
+      "id": 2,
+      "title": "Startup Pitch & Networking Night",
+      "description": "Watch 10 promising startups pitch their ideas to a panel of top-tier venture capitalists. Enjoy an evening of fine dining, drinks, and incredible networking opportunities that could change your career trajectory.",
+      "event_date": "2026-04-20T18:30:00.000Z",
+      "location": "The Grand Atrium, New York, NY",
+      "created_by": 1,
+      "created_at": "2026-03-25T17:05:00.000Z",
+      "image": "2"
+    },
+    {
+      "id": 3,
+      "title": "React Advanced Workshop",
+      "description": "A deep dive into advanced React patterns, concurrent mode, Server Components, and performance optimization techniques. This hands-on workshop requires prerequisite knowledge of JavaScript and modern frontend frameworks.",
+      "event_date": "2026-05-02T10:00:00.000Z",
+      "location": "Online (Zoom Link Provided upon Registration)",
+      "created_by": 1,
+      "created_at": "2026-03-25T17:10:00.000Z",
+      "image": "3"
+    },
+    {
+      "id": 4,
+      "title": "Annual Music & Arts Festival",
+      "description": "Experience an incredible lineup of international and local artists across 4 stages. Enjoy interactive art installations, local food vendors, and a celebration of creativity lasting the entire weekend.",
+      "event_date": "2026-07-10T12:00:00.000Z",
+      "location": "Golden Gate Park, San Francisco, CA",
+      "created_by": 1,
+      "created_at": "2026-03-25T17:15:00.000Z",
+      "image": "4"
+    }
+  ],
+  "registrations": [],
+  "contact_messages": []
+}

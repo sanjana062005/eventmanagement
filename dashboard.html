@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard - EventHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html">EventHub</a>
+            <div class="collapse navbar-collapse show" id="navMenu">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="events.html">Browse Events</a></li>
+                    <li class="nav-item"><button class="btn btn-outline-light ms-2 px-3 rounded-pill" onclick="logout()">Logout</button></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5 flex-grow-1">
+        <h2 class="fw-bold mb-4" id="welcomeMsg">My Dashboard</h2>
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm p-4">
+                    <h4 class="fw-bold mb-4">My Registrations</h4>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Event Title</th>
+                                    <th>Date</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="registrationsTable">
+                                <tr><td colspan="5" class="text-center"><div class="spinner-border text-primary spinner-border-sm"></div> Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- html2pdf for certificates -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        checkAuth();
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            document.getElementById('welcomeMsg').innerText = `Welcome, ${user.name}!`;
+            const tbody = document.getElementById('registrationsTable');
+
+            try {
+                const regs = await fetchAPI('/registrations/my-registrations');
+                if (regs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">You have not registered for any events yet.</td></tr>';
+                    return;
+                }
+
+                let html = '';
+                regs.forEach(reg => {
+                    const eventDate = new Date(reg.event_date);
+                    const isPast = eventDate.getTime() < new Date().getTime();
+                    const dateStr = eventDate.toLocaleDateString();
+
+                    let actionBtn = `<span class="badge bg-secondary">Upcoming</span>`;
+                    if (isPast) {
+                        actionBtn = `<button class="btn btn-sm btn-success fw-bold" onclick="downloadCertificate('${reg.title}', '${user.name}', '${dateStr}')"><i class="bi bi-download"></i> Certificate</button>`;
+                    }
+
+                    html += `
+                        <tr>
+                            <td class="fw-bold text-primary">${reg.title}</td>
+                            <td>${dateStr}</td>
+                            <td>${reg.location}</td>
+                            <td><span class="badge bg-success">Confirmed</span></td>
+                            <td>${actionBtn}</td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Failed to load registrations.</td></tr>';
+            }
+        });
+
+        function downloadCertificate(eventName, userName, date) {
+            const certElement = document.createElement('div');
+            certElement.innerHTML = `
+                <div style="padding: 50px; text-align: center; border: 10px solid #764ba2; font-family: 'Inter', sans-serif; background: #fff; width: 800px; height: 600px;">
+                    <br><br>
+                    <h1 style="color: #764ba2; font-size: 50px;">Certificate of Participation</h1>
+                    <br><br>
+                    <p style="font-size: 20px;">This is to certify that</p>
+                    <h2 style="font-size: 35px; border-bottom: 2px solid #000; display: inline-block; padding-bottom: 5px;">${userName}</h2>
+                    <br><br>
+                    <p style="font-size: 20px;">has successfully participated in the event</p>
+                    <h3 style="font-size: 28px; color: #dc3545;">${eventName}</h3>
+                    <p style="font-size: 18px;">held on ${date}</p>
+                    <br><br><br>
+                    <div style="float: right; text-align: center; width: 200px; border-top: 1px solid #000; padding-top: 10px;">Authorized Signature</div>
+                </div>
+            `;
+            const opt = {
+                margin:       0,
+                filename:     `Certificate_${eventName}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
+            };
+            html2pdf().set(opt).from(certElement).save();
+        }
+    </script>
+</body>
+</html>
